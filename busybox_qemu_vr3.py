@@ -228,10 +228,10 @@ def DownloadHelper():
 
 
 
-def DownloadArmDeveloperToolchain():
+def DownloadLinaroToolchain():
 	os.chdir(TC_DIR)
 	print("Enter  Toolchain dir \n")
-	print("getting  arm64 aarch64  Linaro toolchain \n")
+	print("getting   aarch64  Linaro toolchain \n")
 	
 	tcc=glob.glob('gcc-linaro-*')
 	if tcc:
@@ -299,7 +299,7 @@ if __name__ =='__main__':
 	print("Creating work Area \n")
 	createWorkArea()
 	print("Downloading cross toolchain from Linaro \n")
-	DownloadArmDeveloperToolchain()
+	DownloadLinaroToolchain()
 	print("Download helper artifacts \n")
 	DownloadHelper()
 	print('Download kernel and busybox \n')
