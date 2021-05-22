@@ -33,23 +33,25 @@ def 	launchQemu():
 
 
 def	makeKernel():
-	os.chdir(STAGE)
-	kd=glob.glob('linux-*')
-	print(kd)
-	kernel_dir=kd[1]
-	os.chdir(kernel_dir)
-	os.system("source "+ TC_DIR + '/' + 'poky_sdk/environment-setup-aarch64-poky-linux' + ';' + "time make ARCH=arm64   O=" +TOP+"/obj/kernel-build -j2")
+        os.chdir(STAGE)
+        kd=glob.glob('linux-*')
+        for i in kd:
+            if not "tar" in i:
+                kernel_dir=i
+        os.chdir(kernel_dir)
+        os.system("source "+ TC_DIR + '/' + 'poky_sdk/environment-setup-aarch64-poky-linux' + ';' + "time make ARCH=arm64   O=" +TOP+"/obj/kernel-build -j2")
 
 
 def     config_kernel_minimal():
-	os.chdir(STAGE)
-	kd=glob.glob('linux-*')
-	print(kd)
-	kernel_dir=kd[1]
-	os.chdir(kernel_dir)
-	os.system("mkdir -pv " + TOP + "/obj/kernel-build/")
-	os.system("cp " + HELPER_DIR + "/qemu-arm-binaries/defconfig" + ' ' + TOP + "/obj/kernel-build/.config")
-	os.system("source "+ TC_DIR + '/' + 'poky_sdk/environment-setup-aarch64-poky-linux' + ';' + "make ARCH=arm64   O=" +TOP+"/obj/kernel-build olddefconfig")
+        os.chdir(STAGE)
+        kd=glob.glob('linux-*')
+        for i in kd:
+            if not "tar" in i:
+                kernel_dir=i
+        os.chdir(kernel_dir)
+        os.system("mkdir -pv " + TOP + "/obj/kernel-build/")
+        os.system("cp " + HELPER_DIR + "/qemu-arm-binaries/defconfig" + ' ' + TOP + "/obj/kernel-build/.config")
+        os.system("source "+ TC_DIR + '/' + 'poky_sdk/environment-setup-aarch64-poky-linux' + ';' + "make ARCH=arm64   O=" +TOP+"/obj/kernel-build olddefconfig")
 
 
 def	create_initramfs():
@@ -89,40 +91,42 @@ def createInitramsStructure():
 
 
 def minimalUserland():
-	os.chdir(STAGE)
-	busybox=glob.glob('busybox-*')
-	print(busybox)
-	busybox_dir=busybox[0]
-	bd=os.chdir(busybox_dir)
-	os.system("cp " + HELPER_DIR + '/qemu-arm-binaries/*.patch' + ' ' + '.')
-	os.system("patch -p1 < busybox-1.31.1-glibc-2.31.patch")
-	os.system("patch -p1 < busybox-yocto.patch")
-	cwd=os.getcwd()
-	print(cwd)
-	barm="obj/busybox-arm"
-	barm_path=os.path.join(TOP,barm)
-	print(barm_path)
-	os.system("mkdir -p " + barm_path)
-	cmd='source '+ TC_DIR + '/' + 'poky_sdk/environment-setup-aarch64-poky-linux' + ';' +'make O=' + barm_path + '  defconfig'
-	print(cmd)
-	bb1=subprocess.run(cmd,shell=True,check=True, stdout=subprocess.PIPE, universal_newlines=True)
-	print(bb1.stdout)
-	rc=bb1.returncode
-	if rc!=0:
-		print('busybox defconf failed')
-	else:
-		print('setting defconfig successfull \n')
-		print('Building busybox as static \n')
-		cmd1='sed -i ' + '\'s/# CONFIG_STATIC is not set/CONFIG_STATIC=y/\' ' + barm_path + "/.config"
-		print(cmd1)
-		bb2=subprocess.run(cmd1,shell=True,check=True, stdout=subprocess.PIPE, universal_newlines=True)
-		print(bb2.stdout)
-		os.chdir(barm_path)
-		cmd2='source '+ TC_DIR + '/' + 'poky_sdk/environment-setup-aarch64-poky-linux' + ';' + 'make -j2 '
-		bb3=subprocess.run(cmd2,shell=True,check=True, stdout=subprocess.PIPE, universal_newlines=True)
+        os.chdir(STAGE)
+        busybox=glob.glob('busybox-*')
+        print(busybox)
+        for i in busybox:
+            if not "tar" in i:
+                busybox_dir=i
+        bd=os.chdir(busybox_dir)
+        os.system("cp " + HELPER_DIR + '/qemu-arm-binaries/*.patch' + ' ' + '.')
+#        os.system("patch -p1 < busybox-1.31.1-glibc-2.31.patch")
+        os.system("patch -p1 < busybox-yocto.patch")
+        cwd=os.getcwd()
+        print(cwd)
+        barm="obj/busybox-arm"
+        barm_path=os.path.join(TOP,barm)
+        print(barm_path)
+        os.system("mkdir -p " + barm_path)
+        cmd='source '+ TC_DIR + '/' + 'poky_sdk/environment-setup-aarch64-poky-linux' + ';' +'make O=' + barm_path + '  defconfig'
+        print(cmd)
+        bb1=subprocess.run(cmd,shell=True,check=True, stdout=subprocess.PIPE, universal_newlines=True)
+        print(bb1.stdout)
+        rc=bb1.returncode
+        if rc!=0:
+            print('busybox defconf failed')
+        else:
+                print('setting defconfig successfull \n')
+                print('Building busybox as static \n')
+                cmd1='sed -i ' + '\'s/# CONFIG_STATIC is not set/CONFIG_STATIC=y/\' ' + barm_path + "/.config"
+                print(cmd1)
+                bb2=subprocess.run(cmd1,shell=True,check=True, stdout=subprocess.PIPE, universal_newlines=True)
+                print(bb2.stdout)
+                os.chdir(barm_path)
+                cmd2='source '+ TC_DIR + '/' + 'poky_sdk/environment-setup-aarch64-poky-linux' + ';' + 'make -j2 '
+                bb3=subprocess.run(cmd2,shell=True,check=True, stdout=subprocess.PIPE, universal_newlines=True)
 #		print(bb3.stdout)
-		cmd3='source '+ TC_DIR + '/' + 'poky_sdk/environment-setup-aarch64-poky-linux' + ';'+ 'make  install'
-		bb4=subprocess.run(cmd3,shell=True,check=True, stdout=subprocess.PIPE, universal_newlines=True)
+                cmd3='source '+ TC_DIR + '/' + 'poky_sdk/environment-setup-aarch64-poky-linux' + ';'+ 'make  install'
+                bb4=subprocess.run(cmd3,shell=True,check=True, stdout=subprocess.PIPE, universal_newlines=True)
 #		print(bb4.stdout)
 		
 
@@ -291,7 +295,6 @@ def DownloadYoctoToolchain():
 		dirname=os.listdir()
 		for i in dirname:
 			if os.path.isdir(i):
-				global tcbd
 				tcbd=i
 				print(tcbd)   
 
