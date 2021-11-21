@@ -15,6 +15,7 @@ PATH=os.environ.get('PATH')
 
 #yocto link
 toolchain_link='http://downloads.yoctoproject.org/releases/yocto/yocto-2.6/toolchain/x86_64/'
+toolchain_link_bootlin='https://toolchains.bootlin.com'
 all_toolchain=[]
 
 
@@ -83,4 +84,52 @@ class ToolChain():
                 for i in dirname:
                     if os.path.isdir(i):
                                 tcbd=i
-                                print(tcbd)   
+                                print(tcbd)
+
+    def bootlin_buildroot_ng(self):
+        os.chdir(self.hv.tc_dir)
+        print("Enter  Toolchain dir \n")
+        print("getting   aarch64  Bootlin toolchain \n")
+
+        tcc=glob.glob('aarch64--glibc--stable*')
+        if tcc:
+                print("toolchain downloaded and extarcted already , skip downloading \n")
+                dirname=os.listdir()
+                for i in dirname:
+                        if os.path.isdir(i):
+                                global tcbd
+                                tcbd=i
+                                print(tcbd)
+        else:
+                res=requests.get('https://toolchains.bootlin.com/releases_aarch64.html')
+                fo=bs4.BeautifulSoup(res.text,'html.parser')
+                check=fo.find_all('a')
+
+                for i in check:
+                        if "aarch64--glibc--stable" in str(i):
+                            all_toolchain.append(i)
+
+                x=all_toolchain[0]
+                qu=re.findall(r'"([^"]*)"',str(x))
+                tar1=qu[0]
+
+
+                global Ft
+                Ft=toolchain_link_bootlin+tar1
+                print(Ft)
+                print("Got toolchian path , now downloading aarch64 toolchain \n")
+                get_toolchain=requests.get(Ft)
+                zname = "toolchain-binaries.tar.xz"
+                zfile = open(zname, 'wb')
+                zfile.write(get_toolchain.content)
+                zfile.close()
+                k_tarb=tarfile.open('toolchain-binaries.tar.xz')
+                print(type(k_tarb))
+                k_tarb.extractall('.')
+                k_tarb.close()
+                dirname=os.listdir()
+                for i in dirname:
+                    if os.path.isdir(i):
+                        tcbd=i
+                        print(tcbd)
+

@@ -18,7 +18,7 @@ if __name__=='__main__':
     create_wa.create_work_area()
     create_wa.download_helper()
     parser=argparse.ArgumentParser()
-    parser.add_argument('--toolchain',type=str,required=True)
+    parser.add_argument('--toolchain',type=str,required=True,choices=["yocto","crosstool-ng","bootlin-buildroot","linaro","arm-developer","clang-toolchain"],help="Toolchain options")
     args=parser.parse_args()
     
     if args.toolchain == 'yocto':
@@ -53,6 +53,16 @@ if __name__=='__main__':
         print("Downloading bootlin buildroot toolchain \n")
         dt=ToolChain()
         dt.bootlin_buildroot_ng()
+        dkb=DownloadKernelBusybox()
+        dkb.download_kernel_busybox()
+        userland=UserLand()
+        userland.minimal_userland_bootlin()
+        userland.build_initramfs()
+        userland.create_init_file()
+        userland.create_initramfs()
+        kb=Kernel()
+        kb.config_kernel_minimal_bootlin()
+        launch_qemu()
     elif args.toolchain == 'linaro':
         print("Downloading linaro toolchain \n")
         dt=ToolChain()

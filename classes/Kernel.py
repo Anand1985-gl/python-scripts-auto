@@ -43,3 +43,15 @@ class Kernel():
         os.system("export PATH="+ self.hv.tc_dir + '/' + 'x-tools/aarch64-unknown-linux-gnu/bin' +  ':' + '$PATH'+  ';'+"make ARCH=arm64 CROSS_COMPILE=aarch64-unknown-linux-gnu-  O=" + self.hv.top +"/obj/kernel-build olddefconfig")
         os.system("export PATH="+ self.hv.tc_dir + '/' + 'x-tools/aarch64-unknown-linux-gnu/bin' +  ':' + '$PATH'+ ';' + "time make ARCH=arm64 CROSS_COMPILE=aarch64-unknown-linux-gnu- O=" + self.hv.top +"/obj/kernel-build -j2")
 
+
+    def config_kernel_minimal_bootlin(self):
+        os.chdir(self.hv.stage)
+        kd=glob.glob('linux-*')
+        for i in kd:
+            if not "tar" in i:
+                kernel_dir=i
+        os.chdir(kernel_dir)
+        os.system("mkdir -pv " + self.hv.top + "/obj/kernel-build/")
+        os.system("cp " + self.hv.helper_dir + "/qemu-arm-binaries/defconfig" + ' ' + self.hv.top + "/obj/kernel-build/.config")
+        os.system("export PATH="+ self.hv.tc_dir + '/' + 'aarch64--glibc--stable-2020.08-1' + '/bin' + ':' + '$PATH'+ ';'+"make ARCH=arm64 CROSS_COMPILE=aarch64-buildroot-linux-gnu-  O=" +self.hv.top+"/obj/kernel-build olddefconfig")
+        os.system("export PATH="+ self.hv.tc_dir + '/' + 'aarch64--glibc--stable-2020.08-1' + '/bin' + ':' + '$PATH'+ ';' + "time make ARCH=arm64 CROSS_COMPILE=aarch64-buildroot-linux-gnu-  O=" + self.hv.top + "/obj/kernel-build -j2")
